@@ -13,17 +13,16 @@ const VALID_PLAYLIST_URI = `${VALID_USER_ID}:playlist:${VALID_PLAYLIST_ID}`;
 
 
 let api: any;
-let loadAPI = function(done: Function) {
+let loadAPI = function() {
   // Reload API
-  API({
-    accessToken: config.access_token,
-    refreshToken: config.refresh_token
-  }).then((client: any) => {
-    api = client;
-    done();
-  }).catch((error: Error) => {
-    console.log(error.toString());
-  });
+  api = new API(config.access_token);
+}
+
+let invalidateCacheAndReload = function() {
+  // Invalidate singletons
+  delete require.cache[require.resolve('../playlist')]
+  PlaylistFactory = require('../playlist')['PlaylistFactory'];
+  Playlist = require("../playlist").default;
 }
 
 describe('Playlist', function() {
@@ -34,13 +33,7 @@ describe('Playlist', function() {
 
   describe('factory', function() {
 
-    let invalidateCacheAndReload = function() {
-      // Invalidate singletons
-      delete require.cache[require.resolve('../playlist')]
-      PlaylistFactory = require('../playlist')['PlaylistFactory'];
-      Playlist = require("../playlist").default;
-    }
-
+    // Hooks
     beforeEach(invalidateCacheAndReload);
     afterEach(invalidateCacheAndReload);
 
