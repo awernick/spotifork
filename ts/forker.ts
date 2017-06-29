@@ -1,6 +1,6 @@
 import * as commander from "commander";
-import Playlist from "./playlist";
-let api = require('api');
+import Playlist, { PlaylistFactory } from "./playlist";
+let client = require('api');
 
 interface ForkerArgs {
   visible: boolean
@@ -16,11 +16,12 @@ class Forker {
 
   constructor(args: ForkerArgs) {
     this.visible = args.visible;
+    PlaylistFactory.setClient(client);
   }
 
   public fork(uri: string) {
-    let playlist = Playlist.fromUri(uri);
-    api.getMe().then((user: any) => {
+    let playlist = PlaylistFactory.fromUri(uri);
+    client.getMe().then((user: any) => {
       playlist = playlist.duplicate({
         userId: user.id,
         visible: this.visible
