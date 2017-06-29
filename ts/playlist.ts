@@ -94,12 +94,12 @@ class PlaylistFactoryBuilder {
 
   public fromUri(uri: string) {
     var [userId, kind, id] = uri.split(':');
-    let playlist = new Playlist("blank", { 
+    let playlist = this.create("NewPlaylist", {
       userId: userId,
       id: id,
       visible: false, 
       collaborative: false 
-    }, this.client)
+    });
     playlist.load();
     return playlist;
   }
