@@ -1,7 +1,7 @@
 import "mocha";
 import * as chai from "chai";
 let config = require('./helpers').config;
-let api = require('../api')(config.access_token, config.refreshToken);
+let API = require('../api');
 let Playlist = require("../playlist").default;
 let PlaylistFactory = require('../playlist')['PlaylistFactory'];
 let should = chai.should();
@@ -12,20 +12,31 @@ const VALID_PLAYLIST_ID = '37i9dQZF1DXdgz8ZB7c2CP';
 const VALID_PLAYLIST_URI = `${VALID_USER_ID}:playlist:${VALID_PLAYLIST_ID}`;
 
 
+let api: any;
+let loadAPI = function(done: Function) {
+  // Reload API
+  API({
+    accessToken: config.access_token,
+    refreshToken: config.refresh_token
+  }).then((client: any) => {
+    api = client;
+    done();
+  }).catch((error: Error) => {
+    console.log(error.toString());
+  });
+}
+
 describe('Playlist', function() {
-  beforeEach(function() {
-  })
+  before(loadAPI);
 
   describe('constructor', function() {
   })
 
   describe('factory', function() {
+
     let invalidateCacheAndReload = function() {
       // Invalidate singletons
       delete require.cache[require.resolve('../playlist')]
-
-      // Reload singleton classes
-      api = require('../api')(config.access_token, config.refreshToken);
       PlaylistFactory = require('../playlist')['PlaylistFactory'];
       Playlist = require("../playlist").default;
     }
@@ -85,7 +96,7 @@ describe('Playlist', function() {
         userId: VALID_USER_ID,
         id: "INVALID ID"
       }, api);
-      playlist.load().catch(done)
+      playlist.load().catch(() => { done() })
     })
 
     it('should throw error if user id is invalid', function (done) {
@@ -93,7 +104,7 @@ describe('Playlist', function() {
         userId: "johndoe",
         id: VALID_PLAYLIST_ID
       }, api);
-      playlist.load().catch(done)
+      playlist.load().catch(() => { done() })
     })
 
     it('should load playlist data if id and user id are valid', function(done) {
@@ -101,7 +112,7 @@ describe('Playlist', function() {
         userId: VALID_USER_ID,
         id: VALID_PLAYLIST_ID
       }, api);
-      playlist.load().then(done);
+      playlist.load().then(() => { done() });
     })
 
     it('should not load data if user does not own a playlist with the specified id', function(done) {
@@ -111,7 +122,7 @@ describe('Playlist', function() {
         userId: userId,
         id: VALID_PLAYLIST_ID
       }, api);
-      playlist.load().catch(done);
+      playlist.load().catch(() => { done() });
     })
   })
 

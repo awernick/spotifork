@@ -1,6 +1,5 @@
 import Track from "./track";
 let clone = require('lodash.clone');
-let api = require('./api')();
 
 interface PlaylistOptions {
   id?: string
