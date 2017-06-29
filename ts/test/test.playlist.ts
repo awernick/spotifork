@@ -1,7 +1,7 @@
 import "mocha";
 import * as chai from "chai";
 let config = require('./helpers').config;
-let api = require('../api')(config.access_token);
+let api = require('../api')(config.access_token, config.refreshToken);
 import Playlist from "../playlist";
 let should = chai.should();
 let expect = chai.expect;
@@ -37,9 +37,18 @@ describe('Playlist', function() {
       });
       playlist.load().then(done);
     })
+
+    it('should not load data if user does not own a playlist with the specified id', function(done) {
+      // Valid user id, but does not own playlist
+      let userId = '121785691'
+      let playlist = new Playlist('blank', {
+        userId: userId,
+        id: VALID_PLAYLIST_ID
+      });
+      playlist.load().catch(done);
+    })
   })
 
   describe('fromUri()', function() {
-
   })
 });
