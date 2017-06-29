@@ -1,5 +1,7 @@
 Spotiforker - Spotify Playlist Forker
 
+NOTICE: Still doesn't work, yo! 
+
 -- Purpose
 I love listening to playlist and I hate it when authors remove songs that I 
 enjoy. By forking playlist, I get to keep a copy ( or snapshot) of a playlist
