@@ -1,6 +1,6 @@
 import Track from "./track";
 let clone = require('lodash.clone');
-let api = require('api');
+let api = require('./api')();
 
 interface PlaylistOptions {
   id?: string
@@ -21,7 +21,7 @@ class Playlist {
 
   constructor(name: string, options: PlaylistOptions) {
     this.name = name;
-    this.id = options.id;
+    Object.assign(this, options);
   }
 
   static fromUri(uri: string): Playlist {
@@ -37,13 +37,19 @@ class Playlist {
   }
 
   public load() {
-    api.getPlaylist(this.userId, this.id)
-      .then((data: any) => {
-        this.name = data.name;
-        this.collaborative = data.collaborative;
-        this.description = data.description;
-        this.visible = data.public;
-      })
+    return new Promise<any>((resolve: any, reject: any) => {
+      api.getPlaylist(this.userId, this.id)
+        .then((data: any) => {
+          this.name = data.name;
+          this.collaborative = data.collaborative;
+          this.description = data.description;
+          this.visible = data.public;
+          resolve();
+        })
+        .catch((error: Error) => {
+          reject(error);
+        })
+    })
   }
 
   public duplicate(options: any) {

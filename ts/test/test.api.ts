@@ -9,13 +9,18 @@ const INVALID_ACCESS_TOKEN = "RANDOM_ACCESS_TOKEN";
 const VALID_ACCESS_TOKEN = config.access_token;
 
 describe('API Singleton', function() {
-  beforeEach(function () {
+  let invalidateCache = function() {
     delete require.cache[require.resolve('../api')];
-  })
+  }
+
+  beforeEach(invalidateCache);
+  afterEach(invalidateCache);
 
   describe('initialization', function() {
     it('should throw error if access token is not provided on first call', function (){
-      expect(require('../api')).to.throw(Error);
+      expect(() => {
+        require('../api')();
+      }).to.throw(Error);
     });
 
     it('should not throw error if access token is provided', function () {

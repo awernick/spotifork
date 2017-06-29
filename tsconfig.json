@@ -5,7 +5,8 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "strictNullChecks": true,
-    "outDir": "build"
+    "outDir": "build",
+    "target": "es2015"
   },
   "include": [
     "ts"
