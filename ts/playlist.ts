@@ -18,27 +18,17 @@ class Playlist {
   public collaborative: boolean
   public description: string | undefined
   public tracks: Array<Track>
+  public api: any
 
-  constructor(name: string, options: PlaylistOptions) {
+  constructor(name: string, options: PlaylistOptions, api: any) {
     this.name = name;
     Object.assign(this, options);
-  }
-
-  static fromUri(uri: string): Playlist {
-    var [userId, kind, id] = uri.split(':');
-    let playlist = new Playlist("blank", { 
-      userId: userId,
-      id: id,
-      visible: false, 
-      collaborative: false 
-    })
-    playlist.load();
-    return playlist;
+    this.api = api;
   }
 
   public load() {
     return new Promise<any>((resolve: any, reject: any) => {
-      api.getPlaylist(this.userId, this.id)
+      this.api.getPlaylist(this.userId, this.id)
         .then((data: any) => {
           this.name = data.name;
           this.collaborative = data.collaborative;
@@ -62,7 +52,7 @@ class Playlist {
     }
 
     for(let track of this.tracks) {
-      api.addTracksToPlaylist(this.userId, this.id, track.uri)
+      this.api.addTracksToPlaylist(this.userId, this.id, track.uri)
         .then((data: any) => {
           console.log('Tracks added to playlist!');
         })
@@ -73,7 +63,7 @@ class Playlist {
   }
 
   public create() {
-    api.createPlaylist(this.userId, this.name, {
+    this.api.createPlaylist(this.userId, this.name, {
       public: this.visible,
       collaborative: this.collaborative,
       description: this.description
@@ -86,4 +76,36 @@ class Playlist {
   }
 }
 
+class PlaylistFactoryBuilder {
+
+  /** Spotify REST client **/
+  private client: any
+
+  public setClient(client: any) {
+    this.client = client;
+  }
+
+  public create(name: string, options: PlaylistOptions) {
+    if(this.client == null) {
+      throw new Error("Missing REST client. Call setClient first");
+    }
+    return new Playlist(name, options, this.client);
+  }
+
+  public fromUri(uri: string) {
+    var [userId, kind, id] = uri.split(':');
+    let playlist = new Playlist("blank", { 
+      userId: userId,
+      id: id,
+      visible: false, 
+      collaborative: false 
+    }, this.client)
+    playlist.load();
+    return playlist;
+  }
+}
+
+let PlaylistFactory = new PlaylistFactoryBuilder();
+
+export { PlaylistFactory };
 export default Playlist;
