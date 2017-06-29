@@ -1,6 +1,6 @@
 import * as commander from "commander";
 import Playlist, { PlaylistFactory } from "./playlist";
-let client = require('api');
+let API = require('api');
 
 interface ForkerArgs {
   visible: boolean
@@ -14,14 +14,18 @@ class Forker {
   /** Visibility for playlist forks **/
   private visible: boolean
 
+  /** Spotify REST client **/
+  private client: any;
+
   constructor(args: ForkerArgs) {
     this.visible = args.visible;
-    PlaylistFactory.setClient(client);
+    this.client = new API();
+    PlaylistFactory.setClient(this.client);
   }
 
   public fork(uri: string) {
     let playlist = PlaylistFactory.fromUri(uri);
-    client.getMe().then((user: any) => {
+    this.client.getMe().then((user: any) => {
       playlist = playlist.duplicate({
         userId: user.id,
         visible: this.visible

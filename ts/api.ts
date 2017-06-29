@@ -1,23 +1,16 @@
 let SpotifyAPI = require('spotify-web-api-node');
-let instance: any;
 
-function getInstance(accessToken: string, refreshToken: string) {
-  if(instance == null) {
-    if(accessToken == null) {
-      throw new Error("Initialize API with access token");
+function createRESTClient(options: any) {
+  return new Promise((resolve: any, reject: any) => {
+    if(!options.accessToken) {
+      throw new Error("Please provide access token to authenticate client");
     }
 
-    instance = new SpotifyAPI();
-    instance.setAccessToken(accessToken);
-    instance.setRefreshToken(refreshToken);
-  }
-
-  // Refresh token to ensure everything is working
-  instance.refreshAccessToken().then((data: any) => {
-    instance.setAccessToken(data.body['access_token'])
+    let client = new SpotifyAPI();
+    client.setAccessToken(options.accessToken);
+    client.setRefreshToken(options.refreshToken);
+    resolve(client);
   })
-
-  return instance;
 }
 
-module.exports = getInstance.bind(this);
+module.exports = createRESTClient;
