@@ -3,11 +3,12 @@
     "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": true,
-    "preseveConstEnums": true,
-    "strictNullChecks": true
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "outDir": "build"
   },
   "include": [
-    "src/**/*.ts"
+    "ts"
   ],
   "exclude": [
     "node_modules"

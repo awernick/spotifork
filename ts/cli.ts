@@ -36,8 +36,11 @@ class CLI {
   }
 
   execute() {
+    let api = require('./api')({
+      accessToken: this.commander.accessToken
+    });
+
     let forker = new Forker({
-      accessToken: this.commander.accessToken,
       visible: this.commander.public
     });
 

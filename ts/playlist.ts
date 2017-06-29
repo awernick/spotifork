@@ -1,4 +1,6 @@
 import Track from "./track";
+let clone = require('lodash.clone');
+let api = require('api');
 
 interface PlaylistOptions {
   id?: string
@@ -23,16 +25,34 @@ class Playlist {
   }
 
   static fromUri(uri: string): Playlist {
-    return new Playlist("Test", { visible: false, collaborative: false })
+    var [userId, kind, id] = uri.split(':');
+    let playlist = new Playlist("blank", { 
+      userId: userId,
+      id: id,
+      visible: false, 
+      collaborative: false 
+    })
+    playlist.load();
+    return playlist;
+  }
+
+  public load() {
+    api.getPlaylist(this.userId, this.id)
+      .then((data: any) => {
+        this.name = data.name;
+        this.collaborative = data.collaborative;
+        this.description = data.description;
+        this.visible = data.public;
+      })
   }
 
   public duplicate(options: any) {
-
+    return clone(this);
   }
 
-  public save(api: any) {
+  public save() {
     if(this.id == null) {
-      this.create(api)
+      this.create();
     }
 
     for(let track of this.tracks) {
@@ -46,7 +66,7 @@ class Playlist {
     }
   }
 
-  public create(api: any) {
+  public create() {
     api.createPlaylist(this.userId, this.name, {
       public: this.visible,
       collaborative: this.collaborative,
