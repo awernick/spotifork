@@ -1,4 +1,4 @@
-Spotiforker - Spotify Playlist Forker
+Spotifork - Spotify Playlist Forker
 
 NOTICE: Still doesn't work, yo! 
 

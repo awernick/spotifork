@@ -1,4 +1,4 @@
-describe('Spotifrkr', function() {
+describe('Spotifork', function() {
   require('./test.api');
   require('./test.playlist');
 })
