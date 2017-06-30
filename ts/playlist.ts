@@ -29,10 +29,11 @@ class Playlist {
     return new Promise<any>((resolve: any, reject: any) => {
       this.api.getPlaylist(this.userId, this.id)
         .then((data: any) => {
-          this.name = data.name;
-          this.collaborative = data.collaborative;
-          this.description = data.description;
-          this.visible = data.public;
+          console.log(data);
+          this.name = data.body.name;
+          this.collaborative = data.body.collaborative;
+          this.description = data.body.description;
+          this.visible = data.body.public;
           resolve();
         })
         .catch((error: Error) => {
@@ -62,17 +63,22 @@ class Playlist {
   }
 
   public create() {
-    this.api.createPlaylist(this.userId, this.name, {
-      public: this.visible,
-      collaborative: this.collaborative,
-      description: this.description
-    }).then((data: any) => {
-      console.log(`Playlist ${data.id} created!`);
-      this.id = data.id;
-    }).catch((err: Error) => {
-      console.log(err);
+    return new Promise((resolve, reject) => {
+      this.api.createPlaylist(this.userId, this.name, {
+        public: this.visible,
+        collaborative: this.collaborative,
+        description: this.description
+      }).then((data: any) => {
+        console.log(data);
+        console.log(`Playlist ${data.body.id} created!`);
+        this.id = data.body.id;
+        resolve();
+      }).catch((err: Error) => {
+        reject(err);
+      })
     })
   }
+
 }
 
 class PlaylistFactoryBuilder {
@@ -84,7 +90,7 @@ class PlaylistFactoryBuilder {
     this.client = client;
   }
 
-  public create(name: string, options: PlaylistOptions) {
+  public build(name: string, options: PlaylistOptions) {
     if(this.client == null) {
       throw new Error("Missing REST client. Call setClient first");
     }
@@ -92,14 +98,13 @@ class PlaylistFactoryBuilder {
   }
 
   public fromUri(uri: string) {
-    var [userId, kind, id] = uri.split(':');
-    let playlist = this.create("NewPlaylist", {
+    var [_, _, userId, kind, id] = uri.split(':');
+    let playlist = this.build("NewPlaylist", {
       userId: userId,
       id: id,
       visible: false, 
       collaborative: false 
     });
-    playlist.load();
     return playlist;
   }
 }
