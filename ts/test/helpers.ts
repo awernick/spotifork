@@ -7,6 +7,7 @@ let configPath = path.join(os.homedir(), '.spotiforkr');
 let configFile = fs.readFileSync(configPath);
 let config = JSON.parse(configFile.toString());
 
+/** Generate a new access token and save it to our config fie **/
 function refreshConfig() {
   return new Promise((resolve, reject) => {
     let api = new API(config.access_token);

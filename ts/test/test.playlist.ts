@@ -212,13 +212,10 @@ describe('Playlist', function() {
     })
 
     it('should succeed with current user\'s id and valid name', function(done) {
-      playlist.id = '';
+      playlist.id = ''; // ID needs to be blank in order to create
       playlist.userId = user.id;
-      console.log(playlist.userId);
-      console.log(playlist.name);
+
       playlist.create().then(() => {
-        console.log(playlist.userId);
-        console.log(playlist.id);
         expect(playlist.id).to.not.be.null
         done();
       }).catch((error: any) => {
