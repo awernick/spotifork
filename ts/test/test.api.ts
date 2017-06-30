@@ -6,8 +6,8 @@ let expect = chai.expect;
 let config = require('./helpers').config;
 let SpotifyAPI = require('spotify-web-api-node');
 
-const INVALID_ACCESS_TOKEN = "RANDOM_ACCESS_TOKEN";
-const VALID_ACCESS_TOKEN = config.access_token;
+let INVALID_ACCESS_TOKEN = "RANDOM_ACCESS_TOKEN";
+let VALID_ACCESS_TOKEN = config.access_token;
 
 describe('API', function() {
 

@@ -157,10 +157,11 @@ describe('Playlist', function() {
       playlist.unfollow().catch(() => done());
     })
 
-    it('should succeed if playlist is followed by user', function(done) {
+    it('should succeed if user follows playlist', function(done) {
       api.getUserPlaylists(user.id).then((data: any) => {
-        playlist.id = data.body.items[0].id
-        playlist.userId = user.id
+        let item = data.body.items[0]
+        playlist.id = item.id
+        playlist.userId = item.owner.id
         playlist.unfollow().then(() => {
           done()
         }).catch((error: Error) => {
