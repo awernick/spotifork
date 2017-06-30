@@ -30,7 +30,7 @@ let invalidateCacheAndReload = function() {
 
 let loadCurrentUser = (done: Function) => {
   api.getMe().then((data: any) => {
-    user = data;
+    user = data.body;
     done();
   }).catch((error: Error) => {
     console.error(error.toString());
@@ -135,6 +135,43 @@ describe('Playlist', function() {
     })
   })
 
+  describe('unfollow()', function() {
+    let playlist: any;
+
+    // Hooks
+    before(loadCurrentUser);
+    beforeEach(() => {
+      playlist = buildNewPlaylist();
+    });
+
+    it('should throw error if playlist is not owned by user', function(done) {
+      playlist.userId = 'BLAH BLAH'
+      playlist.id = VALID_PLAYLIST_ID;
+      playlist.unfollow().catch(() => done());
+    })
+
+    it('should throw error if playlist id is not the valid', function(done) {
+      // VALID_USER_ID belongs to spotify and not to me
+      playlist.userId = VALID_USER_ID;
+      playlist.id = "BLAH BLAH"
+      playlist.unfollow().catch(() => done());
+    })
+
+    it('should succeed if playlist is followed by user', function(done) {
+      api.getUserPlaylists(user.id).then((data: any) => {
+        playlist.id = data.body.items[0].id
+        playlist.userId = user.id
+        playlist.unfollow().then(() => {
+          done()
+        }).catch((error: Error) => {
+          done(error);
+        })
+      }).catch((error: Error) => {
+        done(error);
+      })
+    }).timeout(4000);
+  })
+
   describe('create()', function() {
     let playlist: any;
 
@@ -143,6 +180,14 @@ describe('Playlist', function() {
     beforeEach(() => {
       playlist = buildNewPlaylist();
     });
+
+    afterEach((done) => {
+      setTimeout(function() {
+        playlist.unfollow()
+          .then(() => done())
+          .catch((error: Error) => done());
+      }, 500)
+    })
 
     it('should throw error if user id is blank', function() {
       playlist.userId = '';
@@ -166,18 +211,17 @@ describe('Playlist', function() {
     })
 
     it('should succeed with current user\'s id and valid name', function(done) {
-      api.getMe().then((data: any) => {
-        playlist.userId = data.body.id;
+      playlist.id = '';
+      playlist.userId = user.id;
+      console.log(playlist.userId);
+      console.log(playlist.name);
+      playlist.create().then(() => {
         console.log(playlist.userId);
-        console.log(playlist.name);
-        playlist.create().then(() => {
-          expect(playlist.id).to.not.be.null
-          done();
-        }).catch((error: any) => {
-          throw error;
-        })
+        console.log(playlist.id);
+        expect(playlist.id).to.not.be.null
+        done();
       }).catch((error: any) => {
-        throw error;
+        done(error);
       })
     })
 

@@ -29,7 +29,6 @@ class Playlist {
     return new Promise<any>((resolve: any, reject: any) => {
       this.api.getPlaylist(this.userId, this.id)
         .then((data: any) => {
-          console.log(data);
           this.name = data.body.name;
           this.collaborative = data.body.collaborative;
           this.description = data.body.description;
@@ -69,8 +68,6 @@ class Playlist {
         collaborative: this.collaborative,
         description: this.description
       }).then((data: any) => {
-        console.log(data);
-        console.log(`Playlist ${data.body.id} created!`);
         this.id = data.body.id;
         resolve();
       }).catch((err: Error) => {
@@ -79,6 +76,18 @@ class Playlist {
     })
   }
 
+  /** Unfollowing your own playlist is the same as destroying them **/
+  public unfollow() {
+    return new Promise((resolve, reject) => {
+      this.api.unfollowPlaylist(this.userId, this.id)
+        .then((data: any) => {
+          resolve();
+        })
+        .catch((err: Error) => {
+          reject(err);
+        })
+    })
+  }
 }
 
 class PlaylistFactoryBuilder {
