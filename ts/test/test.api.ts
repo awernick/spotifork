@@ -9,7 +9,7 @@ let SpotifyAPI = require('spotify-web-api-node');
 const INVALID_ACCESS_TOKEN = "RANDOM_ACCESS_TOKEN";
 const VALID_ACCESS_TOKEN = config.access_token;
 
-describe('API Singleton', function() {
+describe('API', function() {
 
   describe('initialization', function() {
     it('should throw error if access token is not provided', function (){
