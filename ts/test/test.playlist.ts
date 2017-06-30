@@ -43,11 +43,88 @@ let buildNewPlaylist = () => {
   }, api);
 }
 
+let buildNewTrack = () => {
+  return {
+    id: 'ID' ,
+    uri: 'uri',
+    album: { name: 'album name' },
+    artists: [ { name: 'An artist' } ]
+  }
+}
+
 
 describe('Playlist', function() {
   before(reloadAPI);
 
+
   describe('constructor', function() {
+  })
+
+  describe('_loadTracks()', function() {
+    let playlist: any;
+
+    // Hooks
+    beforeEach(() => {
+      playlist = buildNewPlaylist();
+    });
+
+    it('should not store data if parameter is missing', function() {
+      expect(() => playlist._loadTracks()).to.throw(Error);
+    })
+
+    it('should not store data if parameter is not an array', function() {
+      expect(() => playlist._loadTracks("THIS IS A TEST")).to.throw(Error);
+    })
+
+    it('should not store data if parameter array is empty', function() {
+      playlist._loadTracks([]);
+      expect(playlist.tracks).to.be.empty;
+    })
+
+    it('should load tracks if parameter is present', function() {
+      let track1 = buildNewTrack();
+      let track2 = buildNewTrack();
+      let track3 = buildNewTrack();
+      playlist._loadTracks([
+        { track: track1 }, 
+        { track: track2 }, 
+        { track: track3 }
+      ])
+      expect(playlist.tracks).to.have.lengthOf(3);
+    })
+
+    it('should store album name as attribute', function() {
+      let track = buildNewTrack();
+      let albumName = 'Album Name';
+      track.album.name = albumName;
+      playlist._loadTracks([{ track: track }]);
+      expect(playlist.tracks).to.have.lengthOf(1);
+      expect(playlist.tracks[0].album).to.contain(albumName);
+    })
+
+    it('should store artist name as attribute', function() {
+      let track = buildNewTrack();
+      let artistName = 'Artist Name';
+      track.artists = [{ name: artistName }];
+      playlist._loadTracks([{ track: track }]);
+      expect(playlist.tracks).to.have.lengthOf(1);
+      expect(playlist.tracks[0].artists).to.contain(artistName);
+    })
+
+    it('should join multiple artists into a single attribute', function() {
+      let track = buildNewTrack();
+      let name1 = 'Artist #1';
+      let name2 = 'Artist #2';
+
+      track.artists = [{ name: name1 }, { name: name2 }]
+      playlist._loadTracks([{
+        track: track
+      }])
+
+      expect(playlist.tracks).to.have.lengthOf(1);
+      expect(playlist.tracks[0].artists).to.contain(name1);
+      expect(playlist.tracks[0].artists).to.contain(name2);
+    })
   })
   
   describe('load()', function() {
@@ -104,7 +181,9 @@ describe('Playlist', function() {
         id: VALID_PLAYLIST_ID
       }, api);
 
-      playlist.load().then(() => { done() });
+      playlist.load()
+        .then(() => { done() })
+        .catch((error: Error) => done(error));
     })
 
     it('should load correct name', function(done) {
@@ -117,7 +196,7 @@ describe('Playlist', function() {
       playlist.load().then(() => { 
         expect(playlist.name).to.not.equal(name);
         done() 
-      });
+      }).catch((error: Error) => done(error));
     })
 
     it('should load correct description', function(done) {
@@ -131,7 +210,7 @@ describe('Playlist', function() {
       playlist.load().then(() => { 
         expect(playlist.description).to.not.equal(desc);
         done() 
-      });
+      }).catch((error: Error) => done(error));
     })
   })
 
@@ -186,7 +265,7 @@ describe('Playlist', function() {
       setTimeout(function() {
         playlist.unfollow()
           .then(() => done())
-          .catch((error: Error) => done());
+          .catch((error: Error) => done(error));
       }, 500)
     })
 

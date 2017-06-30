@@ -23,6 +23,7 @@ class Playlist {
     this.name = name;
     Object.assign(this, options);
     this.api = api;
+    this.tracks = [];
   }
 
   public load() {
@@ -33,12 +34,38 @@ class Playlist {
           this.collaborative = data.body.collaborative;
           this.description = data.body.description;
           this.visible = data.body.public;
+          this._loadTracks(data.body.tracks.items);
           resolve();
         })
         .catch((error: Error) => {
           reject(error);
         })
     })
+  }
+
+  public _loadTracks(items: Array<any>) {
+    if (typeof items === 'undefined' || !Array.isArray(items)) {
+      throw new Error('Please provide an array of tracks to load');
+    }
+
+    for(let item of items) {
+      item = item.track;
+
+      // Load artists names
+      let artists: Array<string> = []; 
+      for(let artist of item.artists) {
+        artists.push(artist.name);
+      }
+
+      let track: Track = {
+        id: item.id,
+        uri: item.uri,
+        name: item.name,
+        album: item.album.name,
+        artists: artists.join(', ')
+      }
+      this.tracks.push(track);
+    }
   }
 
   public duplicate(options: any) {
