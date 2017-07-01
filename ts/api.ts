@@ -54,7 +54,7 @@ function generateAccessToken() {
     tmp_url.query = {};
     tmp_url.query['client_id'] = CLIENT_ID;
     tmp_url.query['response_type'] = 'token';
-    tmp_url.query['scope'] = SCOPES;
+    tmp_url.query['scope'] = SCOPES.join(' ');
     let auth_url = url.format(tmp_url);
     auth_url += `&redirect_uri=${REDIRECT_URI}`;
 

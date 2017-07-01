@@ -43,49 +43,31 @@ class Playlist {
     })
   }
 
-  public _loadTracks(items: Array<any>) {
-    if (typeof items === 'undefined' || !Array.isArray(items)) {
-      throw new Error('Please provide an array of tracks to load');
-    }
-
-    for(let item of items) {
-      item = item.track;
-
-      // Load artists names
-      let artists: Array<string> = []; 
-      for(let artist of item.artists) {
-        artists.push(artist.name);
-      }
-
-      let track: Track = {
-        id: item.id,
-        uri: item.uri,
-        name: item.name,
-        album: item.album.name,
-        artists: artists.join(', ')
-      }
-      this.tracks.push(track);
-    }
-  }
 
   public duplicate(options: any) {
-    return clone(this);
+    let playlist = clone(this);
+    Object.assign(this, options);
+    return playlist;
   }
 
   public save() {
-    if(this.id == null) {
-      this.create();
-    }
+    return new Promise((resolve, reject) => {
 
-    for(let track of this.tracks) {
-      this.api.addTracksToPlaylist(this.userId, this.id, track.uri)
-        .then((data: any) => {
-          console.log('Tracks added to playlist!');
-        })
-        .catch((err: any) => {
-          console.error(err.toString());
-        })
-    }
+      // Use this so that I don't repeat resolve / reject code
+      let saveTracksFn = () => {
+        this._saveTracks()
+          .then(() => resolve())
+          .catch((err: Error) => reject(err));
+      }
+
+      if(this.id == null) {
+        this.create()
+          .then(() => saveTracksFn())
+          .catch((err: Error) => reject(err))
+      } else {
+        saveTracksFn();
+      }
+    })
   }
 
   public create() {
@@ -111,6 +93,50 @@ class Playlist {
           resolve();
         })
         .catch((err: Error) => {
+          reject(err);
+        })
+    })
+  }
+
+  public _loadTracks(items: Array<any>) {
+    if (typeof items === 'undefined' || !Array.isArray(items)) {
+      throw new Error('Please provide an array of tracks to load');
+    }
+
+    for(let item of items) {
+      item = item.track;
+
+      // Load artists names
+      let artists: Array<string> = []; 
+      for(let artist of item.artists) {
+        artists.push(artist.name);
+      }
+
+      let track: Track = {
+        id: item.id,
+        uri: item.uri,
+        name: item.name,
+        album: item.album.name,
+        artists: artists.join(', ')
+      }
+      this.tracks.push(track);
+    }
+  }
+
+  public _saveTracks() {
+    let uris: Array<string> = [];
+    for(let track of this.tracks) {
+      uris.push(track.uri);
+    }
+
+    return new Promise((resolve, reject) => {
+      this.api.addTracksToPlaylist(this.userId, this.id, uris)
+        .then((data: any) => {
+          console.log('Tracks added to playlist!');
+          resolve(data);
+        })
+        .catch((err: any) => {
+          console.error(err.toString());
           reject(err);
         })
     })
