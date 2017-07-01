@@ -1,18 +1,17 @@
 import "mocha";
 import * as chai from "chai";
-let config = require('./helpers').config;
+let helpers = require('./helpers');
+let config = helpers.config;
 let API = require('../api');
 let Playlist = require("../playlist").default;
 let PlaylistFactory = require('../playlist')['PlaylistFactory'];
 let should = chai.should();
 let expect = chai.expect;
 
-const VALID_USER_ID = 'spotify';
-const VALID_PLAYLIST_ID = '37i9dQZF1DXdgz8ZB7c2CP';
-const VALID_PLAYLIST_URI = 
-`spotify:user:${VALID_USER_ID}:playlist:${VALID_PLAYLIST_ID}`;
-
-const PERSONAL_PLAYLIST_ID = '3LMKpFlpPDC1QjE49DmDms';
+const VALID_USER_ID = helpers.VALID_USER_ID;
+const VALID_PLAYLIST_ID = helpers.VALID_PLAYLIST_ID;
+const VALID_PLAYLIST_URI = helpers.VALID_PLAYLIST_URI;
+const PERSONAL_PLAYLIST_ID = helpers.PERSONAL_PLAYLIST_ID;
 
 let api: any;
 let user: any;

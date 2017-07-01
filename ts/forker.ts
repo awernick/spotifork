@@ -1,6 +1,6 @@
 import * as commander from "commander";
 import Playlist, { PlaylistFactory } from "./playlist";
-let API = require('api');
+let API = require('./api');
 
 interface ForkerArgs {
   accessToken: string
@@ -25,14 +25,39 @@ class Forker {
   }
 
   public fork(uri: string) {
-    let playlist = PlaylistFactory.fromUri(uri);
-    this.client.getMe().then((user: any) => {
-      playlist = playlist.duplicate({
-        userId: user.id,
-        visible: this.visible
+    return new Promise((resolve, reject) => {
+      let playlist = PlaylistFactory.fromUri(uri);
+      let user: any;
+
+      // Load User data
+      this.client.getMe()
+      .then((data: any) => { user = data.body })
+
+      // Load playlist tracks and info
+      .then(() => { return playlist.load() })
+
+      // Change playlist user and remove id
+      .then(() => {
+        playlist = playlist.duplicate({
+          id: '',
+          userId: user.id,
+          visible: this.visible
+        });
+        console.log(playlist.id);
+        console.log(playlist.userId);
+        return playlist.create();
+      })
+
+      // Save playlist to the current user's account
+      .then(() => { return playlist.save() })
+
+      // Success!
+      .then(() => resolve())
+
+      // Throw error if anything happened in the chain
+      .catch((err: Error) => {
+        reject(err);
       });
-      playlist.create();
-      playlist.save();
     })
   }
 }
