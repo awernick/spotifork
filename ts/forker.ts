@@ -43,8 +43,6 @@ class Forker {
           userId: user.id,
           visible: this.visible
         });
-        console.log(playlist.id);
-        console.log(playlist.userId);
         return playlist.create();
       })
 
