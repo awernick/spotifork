@@ -65,13 +65,11 @@ function generateAccessToken() {
   })
 }
 
-function createRESTClient(accessToken: string) {
-  if(accessToken == null) {
-    throw new Error("Please provide access token to authenticate client");
-  }
-
+function createRESTClient(accessToken?: string) {
   let client = new SpotifyAPI();
-  client.setAccessToken(accessToken);
+  if(accessToken) {
+    client.setAccessToken(accessToken);
+  }
   client.generateAccessToken = generateAccessToken;
   return client;
 }

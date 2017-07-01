@@ -3,6 +3,7 @@ import Playlist, { PlaylistFactory } from "./playlist";
 let API = require('api');
 
 interface ForkerArgs {
+  accessToken: string
   visible: boolean
 }
 
@@ -14,12 +15,12 @@ class Forker {
   /** Visibility for playlist forks **/
   private visible: boolean
 
-  /** Spotify REST client **/
+  /** Spotify API REST client **/
   private client: any;
 
   constructor(args: ForkerArgs) {
     this.visible = args.visible;
-    this.client = new API();
+    this.client = new API(args.accessToken);
     PlaylistFactory.setClient(this.client);
   }
 
