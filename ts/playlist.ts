@@ -14,8 +14,8 @@ class Playlist {
   public id: string | undefined
   public userId: string | undefined
   public name: string
-  public visible: boolean
-  public collaborative: boolean
+  public visible: boolean | undefined
+  public collaborative: boolean | undefined
   public description: string | undefined
   public tracks: Array<Track>
   public api: any
@@ -28,7 +28,11 @@ class Playlist {
    */
   constructor(name: string, options: PlaylistOptions, api: any) {
     this.name = name;
-    Object.assign(this, options);
+    this.userId = options.userId;
+    this.id = options.id;
+    this.visible = options.visible;
+    this.collaborative = options.collaborative;
+    this.description = options.description;
     this.api = api;
     this.tracks = [];
   }
@@ -63,7 +67,7 @@ class Playlist {
    **/
   public duplicate(options: PlaylistOptions) {
     let playlist = clone(this);
-    Object.assign(this, options);
+    playlist = Object.assign(this, options);
     return playlist;
   }
 
