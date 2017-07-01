@@ -41,7 +41,8 @@ class CLI {
     });
 
     let forker = new Forker({
-      visible: this.commander.public
+      visible: this.commander.public,
+      accessToken: this.commander.accessToken
     });
 
     console.log("TEST");

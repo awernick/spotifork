@@ -12,18 +12,6 @@ let VALID_ACCESS_TOKEN = config.access_token;
 describe('API', function() {
 
   describe('initialization', function() {
-    it('should throw error if access token is not provided', function (){
-      expect(() => {
-        new API()
-      }).to.throw(Error);
-    });
-
-    it('should not throw error if access token is provided', function () {
-      expect(() => {
-        new API(VALID_ACCESS_TOKEN);
-      }).to.not.throw(Error);
-    })
-
     it('should be an instance of SpotifyAPI', function() {
       let api = new API(VALID_ACCESS_TOKEN);
       api.should.be.instanceof(SpotifyAPI);
@@ -39,6 +27,13 @@ describe('API', function() {
 
     it('should not authenticate calls with wrong accessToken', function(done) {
       api.setAccessToken(INVALID_ACCESS_TOKEN);
+      api.getMe().catch((error: Error) => {
+        done();
+      })
+    })
+
+    it('should not authenticate calls with missing accessToken', function(done) {
+      api.setAccessToken('');
       api.getMe().catch((error: Error) => {
         done();
       })
