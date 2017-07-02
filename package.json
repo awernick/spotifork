@@ -1,6 +1,6 @@
 {
   "name": "spotifork-node",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fork Spotify playlists!",
   "main": "build/cli.js",
   "bin": {
