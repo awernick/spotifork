@@ -119,12 +119,18 @@ class CLI {
           accessToken: this.config.access_token
         });
 
+        // TODO: Possibly emit events to track of progress (creating, saving,
+        // loading, etc..)
         console.log("\nForking...");
         for (let uri of this.commander.uris) {
-          console.log(`+ URI: ${uri}`);
           forker.fork(uri)
-            .then(() => console.log("  done!"))
-            .catch((err: Error) => console.error("  " + err.toString()));
+            .then(() => {})
+            .catch((err: Error) => { return err })
+            .then((err: Error) => {
+              console.log(`\n+ URI: ${uri}`);
+              if(err) { console.log("  " + err.toString()) }
+              else { console.log("  done!") }
+            });
         }
       })
       .catch((err) => console.error(err.toString()))
