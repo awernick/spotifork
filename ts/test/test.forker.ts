@@ -36,10 +36,12 @@ describe('Forker', function() {
     // Make sure to remove any forks we created
     afterEach(function(done) {
       if(playlist) {
+        console.log("UNFOLLOW");
         playlist.unfollow()
           .then(() => done())
           .catch((err: Error) => done(err));
       } else {
+        console.log("NOT THERE");
         done();
       }
     })
