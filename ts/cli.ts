@@ -59,7 +59,6 @@ class CLI {
           resolve()
         })
         .catch((err: Error) => {
-          console.error(err.toString());
           reject(err)
         })
     })
@@ -81,7 +80,10 @@ class CLI {
         })
         
         // Access token is invalid. Regenerate...
-        .catch(() => { return this.api.generateAccessToken() })
+        .catch(() => { 
+          console.log("Missing or invalid access token. Regenerating...");
+          return this.api.generateAccessToken() 
+        })
         
         // Save token in config file
         .then((token: string) => { 
@@ -97,7 +99,10 @@ class CLI {
         })
 
         // Unable to generate a new access token, or unable to save config file
-        .catch((err: Error) => reject(err));
+        .catch((err: Error) => {
+          console.error("Could not generate/obtain access token. Exiting...");
+          reject(err)
+        });
     })
   }
 
@@ -114,9 +119,12 @@ class CLI {
           accessToken: this.config.access_token
         });
 
+        console.log("\nForking...");
         for (let uri of this.commander.uris) {
+          console.log(`+ URI: ${uri}`);
           forker.fork(uri)
-            .catch((err: Error) => console.error(err.toString()));
+            .then(() => console.log("  done!"))
+            .catch((err: Error) => console.error("  " + err.toString()));
         }
       })
       .catch((err) => console.error(err.toString()))
