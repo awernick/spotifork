@@ -38,21 +38,29 @@ class CLI {
       let data = fs.readFileSync(CONFIG_PATH, 'utf8')
       this.config = JSON.parse(data);
     } catch (error) {
+      console.log('ERROR');
       fs.writeFileSync(CONFIG_PATH, '');
       this.config = {};
     }
 
-
     if(this.commander.accessToken) {
+      console.log("AM I ERASING?");
       this.config.accessToken = this.commander.accessToken;
     } 
   }
 
   public _validateAPI() {
+    console.log(this.config.access_token);
     return new Promise((resolve, reject) => {
       this.api.getMe()
-        .then(() => resolve())
-        .catch((err: Error) => reject(err))
+        .then(() => {
+          console.log("WORKS");
+          resolve()
+        })
+        .catch((err: Error) => {
+          console.error(err.toString());
+          reject(err)
+        })
     })
   }
 
@@ -63,7 +71,13 @@ class CLI {
       this._validateAPI()
 
         // Access token is valid
-        .then(() => resolve())
+        .then(() => { 
+          resolve();
+
+          // We are rewriting the access token even if it's valid
+          // TODO: Break chain instead of re-writing.
+          return this.config.access_token;
+        })
         
         // Access token is invalid. Regenerate...
         .catch(() => { return this.api.generateAccessToken() })
