@@ -1,8 +1,11 @@
 {
   "name": "spotifork-node",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Fork Spotify playlists!",
   "main": "build/cli.js",
+  "bin": {
+    "spotifork": "build/cli.js"
+  },
   "scripts": {
     "test": "mocha build/test/test.js",
     "build": "tsc",
@@ -35,5 +38,13 @@
     "gulp-typescript": "^3.1.7",
     "mocha": "^3.4.2",
     "typescript": "^2.3.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awernick/spotifork.git"
+  },
+  "bugs": {
+    "url": "https://github.com/awernick/spotifork/issues"
+  },
+  "homepage": "https://github.com/awernick/spotifork#readme"
 }
