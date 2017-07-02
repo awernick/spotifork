@@ -31,7 +31,7 @@ class CLI {
       .action((uris: string) => {
         this.commander.uris = uris;
       })
-      .option('-a, --access-token <token>', 'Spotify API access token')
+      .option('-a, --access-token <token>', 'Spotify Web API access token')
       .option('-p, --public', 'Create all forks as public')
       .parse(process.argv)
   }
