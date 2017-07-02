@@ -9,7 +9,7 @@ npm install spotifork --global
 ```
 spotifork -h
 
-  Usage: cli [options] <uris ...>
+  Usage: spotifork [options] <uris ...>
 
   Options:
 
