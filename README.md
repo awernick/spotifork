@@ -2,7 +2,7 @@
 
 ## Install
 ```
-npm install spotifork --global
+npm install spotifork-node --global
 ```
 
 ## Usage
