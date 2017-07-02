@@ -1,5 +1,5 @@
-import * as commander from 'commander';
 import * as fs from 'fs';
+import * as commander from "commander";
 import Forker from './forker';
 import Constants from './constants';
 
@@ -7,7 +7,7 @@ let API = require('./api');
 let CONFIG_PATH = Constants.CONFIG_PATH;
 
 class CLI {
-  private commander: commander.CommanderStatic 
+  private commander: commander.CommanderStatic;
   private api: any;
   private config: any;
 
@@ -26,11 +26,14 @@ class CLI {
 
   public _setOptions() {
     this.commander
-      .usage('[options] <uri ...>')
-      .arguments('<uri>')
+      .usage('[options] <uris ...>')
+      .arguments('<uris...>')
+      .action((uris: string) => {
+        this.commander.uris = uris;
+      })
       .option('-a, --access-token <token>', 'Spotify API access token')
-      .option('-P, --public', 'Create all forks as public')
-      .parseOptions(process.argv)
+      .option('-p, --public', 'Create all forks as public')
+      .parse(process.argv)
   }
 
   public _loadConfig() {
@@ -38,13 +41,11 @@ class CLI {
       let data = fs.readFileSync(CONFIG_PATH, 'utf8')
       this.config = JSON.parse(data);
     } catch (error) {
-      console.log('ERROR');
       fs.writeFileSync(CONFIG_PATH, '');
       this.config = {};
     }
 
     if(this.commander.accessToken) {
-      console.log("AM I ERASING?");
       this.config.accessToken = this.commander.accessToken;
     } 
   }
@@ -101,6 +102,11 @@ class CLI {
   }
 
   public execute() {
+    if(!this.commander.uris) {
+      console.error('Please specify uris as arguments');
+      return;
+    }
+
     this._loadAPI()
       .then(() => {
         let forker = new Forker({
@@ -108,9 +114,7 @@ class CLI {
           accessToken: this.config.accessToken
         });
 
-        console.log(this.commander.args);
-        console.log(this.commander.uri);
-        for (let uri of this.commander.args) {
+        for (let uri of this.commander.uris) {
           forker.fork(uri);
         }
       })
