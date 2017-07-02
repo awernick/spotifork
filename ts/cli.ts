@@ -1,56 +1,128 @@
+#!/usr/bin/env node
+
+import * as fs from 'fs';
 import * as commander from "commander";
-import * as fs from "fs";
-import Forker from "./forker";
+import Forker from './forker';
+import Constants from './constants';
+
+let API = require('./api');
+let CONFIG_PATH = Constants.CONFIG_PATH;
 
 class CLI {
-  private commander: commander.CommanderStatic 
+  private commander: commander.CommanderStatic;
+  private api: any;
+  private config: any;
 
   constructor() {
     this.commander = commander;
-    this.setVersion();
-    this.setOptions();
-
-    if(this.commander.accessToken == null) {
-      let config = this.loadConfigFile();
-      this.commander.accessToken = config.accessToken;
-    }
+    this.api = new API();
+    this._setVersion();
+    this._setOptions();
+    this._loadConfig();
   }
 
-  setVersion() {
+  public _setVersion() {
     let pinfo = JSON.parse(fs.readFileSync('package.json', 'utf8'));
     this.commander.version(pinfo.version);
   }
 
-  setOptions() {
+  public _setOptions() {
     this.commander
-      .usage('[options] <uri ...>')
-      .arguments('<uri>')
-      .option('-a, --access-token <token>', 'Spotify API access token')
-      .option('-P, --public', 'Create all forks as public')
-      .parseOptions(process.argv)
+      .usage('[options] <uris ...>')
+      .arguments('<uris...>')
+      .action((uris: string) => {
+        this.commander.uris = uris;
+      })
+      .option('-a, --access-token <token>', 'Spotify Web API access token')
+      .option('-p, --public', 'Create all forks as public')
+      .parse(process.argv)
   }
 
-  loadConfigFile() {
-    let data = fs.readFileSync('.spotiforker.json', 'utf8')
-    return JSON.parse(data);
-  }
-
-  execute() {
-    let api = require('./api')({
-      accessToken: this.commander.accessToken
-    });
-
-    let forker = new Forker({
-      visible: this.commander.public
-    });
-
-    console.log("TEST");
-    console.log(this.commander.args);
-    console.log(this.commander.uri);
-    for (let uri of this.commander.args) {
-      forker.fork(uri);
+  public _loadConfig() {
+    try {
+      let data = fs.readFileSync(CONFIG_PATH, 'utf8')
+      this.config = JSON.parse(data);
+    } catch (error) {
+      fs.writeFileSync(CONFIG_PATH, '');
+      this.config = {};
     }
+
+    if(this.commander.accessToken) {
+      this.config.accessToken = this.commander.accessToken;
+    } 
+  }
+
+  public _validateAPI() {
+    return new Promise((resolve, reject) => {
+      this.api.getMe()
+        .then(() => {
+          resolve()
+        })
+        .catch((err: Error) => {
+          console.error(err.toString());
+          reject(err)
+        })
+    })
+  }
+
+  public _loadAPI() {
+    this.api.setAccessToken(this.config.access_token);
+
+    return new Promise((resolve, reject) => {
+      this._validateAPI()
+
+        // Access token is valid
+        .then(() => { 
+          resolve();
+
+          // We are rewriting the access token even if it's valid
+          // TODO: Break chain instead of re-writing.
+          return this.config.access_token;
+        })
+        
+        // Access token is invalid. Regenerate...
+        .catch(() => { return this.api.generateAccessToken() })
+        
+        // Save token in config file
+        .then((token: string) => { 
+
+          // Replace old token with new one
+          this.config.access_token = token;
+
+          // Save config for future use
+          fs.writeFile(CONFIG_PATH, JSON.stringify(this.config), (error?: Error) => {
+            if(error) { return reject(error) }
+            resolve();
+          })
+        })
+
+        // Unable to generate a new access token, or unable to save config file
+        .catch((err: Error) => reject(err));
+    })
+  }
+
+  public execute() {
+    if(!this.commander.uris) {
+      console.error('Please specify uris as arguments');
+      return;
+    }
+
+    this._loadAPI()
+      .then(() => {
+        let forker = new Forker({
+          visible: this.commander.public,
+          accessToken: this.config.access_token
+        });
+
+        for (let uri of this.commander.uris) {
+          forker.fork(uri)
+            .catch((err: Error) => console.error(err.toString()));
+        }
+      })
+      .catch((err) => console.error(err.toString()))
   }
 }
+
+export default CLI;
 
 new CLI().execute();
