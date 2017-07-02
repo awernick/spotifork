@@ -1,11 +1,23 @@
 import * as fs from "fs";
 import * as os from "os"
 import * as path from "path";
+import Constants from "../constants";
 
 let API = require('../api');
-let configPath = path.join(os.homedir(), '.spotiforkr');
-let configFile = fs.readFileSync(configPath);
-let config = JSON.parse(configFile.toString());
+let CONFIG_PATH = Constants.CONFIG_PATH;
+
+// Load config file, or create one
+let configFile: Buffer;
+let config: any;
+
+try {
+  configFile = fs.readFileSync(CONFIG_PATH);
+  config = JSON.parse(configFile.toString());
+} catch (err) {
+  fs.writeFileSync(CONFIG_PATH, '{}');
+  config = {};
+}
+
 
 const VALID_USER_ID = 'spotify';
 const VALID_PLAYLIST_ID = '37i9dQZF1DXdgz8ZB7c2CP';
@@ -23,7 +35,7 @@ function refreshConfig() {
       };
       
       config = {...config, ...new_config};
-      fs.writeFile(configPath, JSON.stringify(config), (error?: Error) => {
+      fs.writeFile(CONFIG_PATH, JSON.stringify(config), (error?: Error) => {
         if(error) { return reject(error) }
         resolve(config);
       })

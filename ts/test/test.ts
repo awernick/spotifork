@@ -15,4 +15,5 @@ describe('spotifork', function() {
   require('./test.api');
   require('./test.playlist');
   require('./test.forker');
+  require('./test.cli');
 })
