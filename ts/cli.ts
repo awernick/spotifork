@@ -51,11 +51,9 @@ class CLI {
   }
 
   public _validateAPI() {
-    console.log(this.config.access_token);
     return new Promise((resolve, reject) => {
       this.api.getMe()
         .then(() => {
-          console.log("WORKS");
           resolve()
         })
         .catch((err: Error) => {
@@ -111,11 +109,12 @@ class CLI {
       .then(() => {
         let forker = new Forker({
           visible: this.commander.public,
-          accessToken: this.config.accessToken
+          accessToken: this.config.access_token
         });
 
         for (let uri of this.commander.uris) {
-          forker.fork(uri);
+          forker.fork(uri)
+            .catch((err: Error) => console.error(err.toString()));
         }
       })
       .catch((err) => console.error(err.toString()))
