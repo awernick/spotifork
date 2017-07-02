@@ -2,6 +2,7 @@ import * as commander from "commander";
 import Playlist, { PlaylistFactory } from "./playlist";
 let API = require('./api');
 
+
 interface ForkerArgs {
   /** Access token for Spotify API **/
   accessToken: string
@@ -9,6 +10,7 @@ interface ForkerArgs {
   /** Visibility for playlist forks **/
   visible: boolean
 }
+
 
 /**
  * Duplicates Spotify playlists using the Web API
@@ -21,6 +23,7 @@ class Forker {
   /** Spotify API REST client **/
   private client: any;
 
+
   /**
    * @constructor
    * @param {ForkerArgs} args - Includes visibility for playlists, and 
@@ -31,6 +34,7 @@ class Forker {
     this.client = new API(args.accessToken);
     PlaylistFactory.setClient(this.client);
   }
+
 
   /**
    * Fork a Spotify playlist using the URI representation.
@@ -63,7 +67,7 @@ class Forker {
       .then(() => { return playlist.save() })
 
       // Success!
-      .then(() => resolve())
+      .then(() => resolve(playlist))
 
       // Throw error if anything happened in the chain
       .catch((err: Error) => {

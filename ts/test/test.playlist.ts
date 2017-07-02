@@ -267,11 +267,13 @@ describe('Playlist', function() {
         description: desc
       }, api);
 
-      playlist.load().then(() => { 
-        expect(playlist.description).to.not.equal(desc);
-        done() 
-      }).catch((error: Error) => done(error));
-    })
+      playlist.load()
+        .then(() => { 
+          expect(playlist.description).to.not.equal(desc);
+          done() 
+        })
+        .catch((error: Error) => done(error));
+    }).timeout(4000);
   })
 
   describe('unfollow()', function() {
