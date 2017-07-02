@@ -185,7 +185,6 @@ class Playlist {
     return new Promise((resolve, reject) => {
       this.api.addTracksToPlaylist(this.userId, this.id, uris)
         .then((data: any) => {
-          console.log('Tracks added to playlist!');
           resolve(data);
         })
         .catch((err: any) => {

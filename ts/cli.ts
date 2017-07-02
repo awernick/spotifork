@@ -81,7 +81,10 @@ class CLI {
         })
         
         // Access token is invalid. Regenerate...
-        .catch(() => { return this.api.generateAccessToken() })
+        .catch(() => { 
+          console.log("Missing or invalid access token. Regenerating...");
+          return this.api.generateAccessToken() 
+        })
         
         // Save token in config file
         .then((token: string) => { 
@@ -97,7 +100,10 @@ class CLI {
         })
 
         // Unable to generate a new access token, or unable to save config file
-        .catch((err: Error) => reject(err));
+        .catch((err: Error) => {
+          console.error("Could not generate/obtain access token. Exiting...");
+          reject(err)
+        });
     })
   }
 
