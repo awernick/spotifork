@@ -9,7 +9,6 @@ interface PlaylistOptions {
   description?: string
 }
 
-
 /** Object representation for a Spotify playlist. **/
 class Playlist {
   public id: string | undefined
@@ -55,8 +54,11 @@ class Playlist {
           this._loadTracks(data.body.tracks.items);
           resolve();
         })
-        .catch((error: Error) => {
-          reject(error);
+        .catch((error: any) => {
+          let err = new Error(
+            "Could not load playlist. Make sure user and id are valid."
+          );
+          reject(err);
         })
     })
   }
@@ -116,7 +118,8 @@ class Playlist {
       }).then((data: any) => {
         this.id = data.body.id;
         resolve();
-      }).catch((err: Error) => {
+      }).catch(() => {
+        let err = new Error("Could not create playlist.");
         reject(err);
       })
     })
@@ -134,7 +137,8 @@ class Playlist {
         .then((data: any) => {
           resolve();
         })
-        .catch((err: Error) => {
+        .catch(() => {
+          let err = new Error(`Could not unfollow playlist: ${this.id}.`);
           reject(err);
         })
     })
@@ -148,7 +152,7 @@ class Playlist {
    */
   public _loadTracks(items: Array<any>) {
     if (typeof items === 'undefined' || !Array.isArray(items)) {
-      throw new Error('Please provide an array of tracks to load');
+      throw new Error('Please provide an array of tracks to load.');
     }
 
     for(let item of items) {
@@ -185,11 +189,10 @@ class Playlist {
     return new Promise((resolve, reject) => {
       this.api.addTracksToPlaylist(this.userId, this.id, uris)
         .then((data: any) => {
-          console.log('Tracks added to playlist!');
           resolve(data);
         })
-        .catch((err: any) => {
-          console.error(err.toString());
+        .catch(() => {
+          let err = new Error(`Could not save tracks for playlist: ${this.id}.`)
           reject(err);
         })
     })
