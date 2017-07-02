@@ -9,6 +9,7 @@ interface PlaylistOptions {
   description?: string
 }
 
+
 /** Object representation for a Spotify playlist. **/
 class Playlist {
   public id: string | undefined
@@ -36,6 +37,7 @@ class Playlist {
     this.api = api;
     this.tracks = [];
   }
+
 
   /**
    * Fetches information from Spotify API and loads it
@@ -71,6 +73,7 @@ class Playlist {
     return playlist;
   }
 
+
   /**
    * Saves a playlist using the Spotify API.
    * If the playlist does not have a valid id, it first calls Playlist#create
@@ -97,6 +100,7 @@ class Playlist {
     })
   }
 
+  
   /**
    * Commits a playlist and its tracks to Spotify.
    * @throws {Error} error - if playlist id is previously set.
@@ -118,6 +122,7 @@ class Playlist {
     })
   }
 
+
   /** 
    * Unfollows a playlist for the current user.
    * NOTE: Unfollowing your own playlist is the same as destroying them 
@@ -134,6 +139,7 @@ class Playlist {
         })
     })
   }
+
 
   /**
    * Convert Spotify API track response into simpler Track objects,
@@ -164,6 +170,7 @@ class Playlist {
       this.tracks.push(track);
     }
   }
+
 
   /**
    * Adds the current tracks to the playlist using the Spotify API.
@@ -200,6 +207,7 @@ class PlaylistFactoryBuilder {
   /** Spotify REST client **/
   private client: any
 
+
   /**
    * Set the Spotify API client
    * @param {SpotifyAPI} client - the Spotify API REST client
@@ -207,6 +215,7 @@ class PlaylistFactoryBuilder {
   public setClient(client: any) {
     this.client = client;
   }
+
 
   /**
    * Builds a Playlist instance with the given name and options.
@@ -220,6 +229,7 @@ class PlaylistFactoryBuilder {
     }
     return new Playlist(name, options, this.client);
   }
+
 
   /**
    * Builds a playlist from the given URI
