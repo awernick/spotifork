@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import * as promised from "chai-as-promised";
 import Forker from "../forker";
 import Playlist, { PlaylistFactory } from "../playlist";
 
@@ -8,6 +9,7 @@ let config = helpers.config;
 let API = require('../api');
 let should = chai.should();
 let expect = chai.expect;
+chai.use(promised);
 
 let forker: Forker;
 let playlist: Playlist | null;
@@ -36,29 +38,27 @@ describe('Forker', function() {
     // Make sure to remove any forks we created
     afterEach(function(done) {
       if(playlist) {
-        console.log("UNFOLLOW");
         playlist.unfollow()
           .then(() => done())
           .catch((err: Error) => done(err));
       } else {
-        console.log("NOT THERE");
         done();
       }
     })
 
-    it('should throw error if API is not authenticated', function(done) {
+    it('should throw error if API is not authenticated', function() {
       forker = new Forker({
         visible: true,
         accessToken: 'INVALID'
       })
 
-      forker.fork(VALID_PLAYLIST_URI)
-        .catch(() => done())
+      return expect(forker.fork(VALID_PLAYLIST_URI))
+        .to.eventually.be.rejected;
     })
 
     it('should throw error if uri is invalid', function(done) {
-      forker.fork('INVALID')
-        .catch(() => done())
+      return expect(forker.fork('INVALID'))
+        .to.eventually.be.rejected;
     })
 
     it('should succeed if API is authenticated and URI is valid', function(done) {
