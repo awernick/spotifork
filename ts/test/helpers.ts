@@ -10,12 +10,10 @@ require('dotenv').config();
 let config: any;
 
 // Overwrite config if in test ENV
-if(process.env.NODE_ENV == 'test') {
-  config = {
-    access_token: process.env.SPOTIFY_ACCESS_TOKEN,
-    refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
-    client_secret: process.env.SPOTIFY_CLIENT_SECRET
-  }
+config = {
+  access_token: process.env.SPOTIFY_ACCESS_TOKEN,
+  refresh_token: process.env.SPOTIFY_REFRESH_TOKEN,
+  client_secret: process.env.SPOTIFY_CLIENT_SECRET
 }
 
 const VALID_USER_ID = 'spotify';
