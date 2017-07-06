@@ -12,5 +12,10 @@ script:
   - npm run build
   - npm run test
 
+env:
+  - NODE_ENV=test
+
 git:
   depth: 3
+
+
