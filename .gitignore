@@ -1,3 +1,4 @@
 *.sw[a-zA-Z0-9]
 node_modules
 /build
+.env
