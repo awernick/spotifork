@@ -1,5 +1,6 @@
 import "mocha";
 import * as chai from "chai";
+import * as promised from "chai-as-promised";
 let helpers = require('./helpers');
 let config = helpers.config;
 let API = require('../api');
@@ -155,32 +156,24 @@ describe('Playlist', function() {
       })
     });
 
-    it('should error if playlist doesn\'t have tracks', function(done) {
+    it('should error if playlist doesn\'t have tracks', function() {
       playlist.tracks = [];
-      playlist._saveTracks().catch(() => {
-        done();
-      })
+      return expect(playlist._saveTracks()).to.eventually.be.rejected;
     })
 
-    it('should succeed if a track is present', function(done) {
-      let track = {
-        uri: 'spotify:track:1jlKdNbOA90rjnt88GJnwO'
-      }
+    it('should succeed if a track is present', function() {
+      let track = { uri: 'spotify:track:1jlKdNbOA90rjnt88GJnwO' }
       playlist.tracks = [track]
-      playlist._saveTracks().then((data: any) => {
-        done();
-      }).catch((err: Error) => done(err))
+      return expect(playlist._saveTracks()).to.eventually.be.fulfilled;
     }).timeout(4000);
 
-    it('should succeed if multiple tracks are present', function(done) {
+    it('should succeed if multiple tracks are present', function() {
       let tracks = [
         { uri: 'spotify:track:1jlKdNbOA90rjnt88GJnwO' },
         { uri: 'spotify:track:0v8QpLDCw2n7ikFuiRKIx5' }
       ]
-      playlist.tracks = tracks
-      playlist._saveTracks().then((data: any) => {
-        done();
-      }).catch((err: Error) => done(err))
+      playlist.tracks = tracks;
+      return expect(playlist._saveTracks()).to.eventually.be.fulfilled;
     }).timeout(4000);
 
     it('should add all tracks to playlist', function() {
@@ -190,29 +183,29 @@ describe('Playlist', function() {
   describe('load()', function() {
     // TODO: Test loading of private playlists
 
-    it('should throw error if id is blank', function(done) {
+    it('should throw error if id is blank', function() {
       let playlist = new Playlist('blank', {
         userId: VALID_USER_ID
       }, api);
 
-      playlist.load().catch(() => { done() })
+      return expect(playlist.load()).to.eventually.be.rejected;
     })
 
-    it('should throw error if id is invalid', function (done) {
+    it('should throw error if id is invalid', function () {
       let playlist = new Playlist('blank', {
         userId: VALID_USER_ID,
         id: "INVALID ID"
       }, api);
 
-      playlist.load().catch(() => { done() })
+      return expect(playlist.load()).to.eventually.be.rejected;
     })
 
-    it('should throw error if user id is blank', function(done) {
+    it('should throw error if user id is blank', function() {
       let playlist = new Playlist('blank', {
         id: VALID_PLAYLIST_ID
       }, api);
 
-      playlist.load().catch(() => { done() })
+      return expect(playlist.load()).to.eventually.be.rejected;
     })
 
     it('should throw error if user id is invalid', function (done) {
@@ -221,10 +214,10 @@ describe('Playlist', function() {
         id: VALID_PLAYLIST_ID
       }, api);
 
-      playlist.load().catch(() => { done() })
+      return expect(playlist.load()).to.eventually.be.rejected;
     })
 
-    it('should not load data if user does not own the playlist', function(done) {
+    it('should not load data if user does not own the playlist', function() {
       // Valid user id, but does not own playlist
       let userId = '121785691'
       let playlist = new Playlist('blank', {
@@ -232,18 +225,17 @@ describe('Playlist', function() {
         id: VALID_PLAYLIST_ID
       }, api);
 
-      playlist.load().catch(() => { done() });
+      return expect(playlist.load()).to.eventually.be.rejected;
     })
 
-    it('should load playlist data if id and user id are valid', function(done) {
+    it('should load playlist data if id and user id are valid', function() {
       let playlist = new Playlist('blank', {
         userId: VALID_USER_ID,
         id: VALID_PLAYLIST_ID
       }, api);
 
-      playlist.load()
-        .then(() => { done() })
-        .catch((error: Error) => done(error));
+      return expect(playlist.load())
+        .to.eventually.be.fulfilled;
     })
 
     it('should load correct name', function(done) {
@@ -285,17 +277,17 @@ describe('Playlist', function() {
       playlist = buildNewPlaylist();
     });
 
-    it('should throw error if playlist is not owned by user', function(done) {
+    it('should throw error if playlist is not owned by user', function() {
       playlist.userId = 'BLAH BLAH'
       playlist.id = VALID_PLAYLIST_ID;
-      playlist.unfollow().catch(() => done());
+      return expect(playlist.unfollow()).to.eventually.be.rejected;
     })
 
-    it('should throw error if playlist id is not the valid', function(done) {
+    it('should throw error if playlist id is not the valid', function() {
       // VALID_USER_ID belongs to spotify and not to me
       playlist.userId = VALID_USER_ID;
       playlist.id = "BLAH BLAH"
-      playlist.unfollow().catch(() => done());
+      return expect(playlist.unfollow()).to.eventually.be.rejected;
     })
 
     it('should succeed if user follows playlist', function(done) {
@@ -335,23 +327,17 @@ describe('Playlist', function() {
 
     it('should throw error if user id is blank', function() {
       playlist.userId = '';
-      return playlist.create().catch((error: any) => {
-        expect(error.statusCode).to.equal(404);
-      })
+      return expect(playlist.create()).to.eventually.be.rejected;
     })
 
     it('should throw error if name is blank', function() {
       playlist.name = '';
-      return playlist.create().catch((error: any) => {
-        expect(error.statusCode).to.equal(400);
-      })
+      return expect(playlist.create()).to.eventually.be.rejected;
     })
 
     it('should throw error if current user does not match with user id', function() {
       // Playlist is using 'spotify' as userId
-      return playlist.create().catch((error: any) => {
-        expect(error.statusCode).to.equal(403);
-      })
+      return expect(playlist.create()).to.eventually.be.rejected;
     })
 
     it('should succeed with current user\'s id and valid name', function(done) {

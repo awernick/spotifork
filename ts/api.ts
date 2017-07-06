@@ -67,6 +67,8 @@ function generateAccessToken() {
 
 function createRESTClient(accessToken?: string) {
   let client = new SpotifyAPI();
+  client.setClientId(CLIENT_ID);
+  client.setRedirectURI(REDIRECT_URI);
   if(accessToken) {
     client.setAccessToken(accessToken);
   }
