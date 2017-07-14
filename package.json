@@ -1,6 +1,6 @@
 {
   "name": "spotifork-node",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Fork Spotify playlists!",
   "main": "build/cli.js",
   "bin": {
@@ -9,7 +9,8 @@
   "scripts": {
     "test": "mocha build/test/test.js",
     "build": "tsc",
-    "prepublish": "npm run build"
+    "clean": "rm -rf build",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "spotify",
