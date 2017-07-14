@@ -181,21 +181,25 @@ class Playlist {
    * @returns {Promise} - status of the Spotify API request
    */
   public _saveTracks() {
-    let uris: Array<string> = [];
-    for(let track of this.tracks) {
-      uris.push(track.uri);
+    function reflect(promise: any){
+      return promise.then(function(v: any){ return {v:v, status: "resolved" }},
+        function(e: any){ return {e:e, status: "rejected" }});
     }
 
-    return new Promise((resolve, reject) => {
-      this.api.addTracksToPlaylist(this.userId, this.id, uris)
-        .then((data: any) => {
-          resolve(data);
-        })
-        .catch(() => {
-          let err = new Error(`Could not save tracks for playlist: ${this.id}.`)
-          reject(err);
-        })
-    })
+    return Promise.all(this.tracks.map((track) => {
+      return new Promise((resolve, reject) => {
+        this.api.addTracksToPlaylist(this.userId, this.id, [track.uri])
+          .then((data: any) => {
+            resolve(data);
+          })
+          .catch(() => {
+            let message = `Could not save track ${track.name}`;
+            console.log(message)
+            let err = new Error(message)
+            reject(err);
+          })
+      })
+    }).map(reflect))
   }
 }
 
