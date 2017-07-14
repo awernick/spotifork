@@ -1,11 +1,12 @@
 let gulp = require('gulp');
 let ts = require('gulp-typescript');
+let tsConfig = require('./tsconfig.json');
 let tsProject = ts.createProject('tsconfig.json');
 
 
 gulp.task('transpile', function() {
-    return tsProject.src()
-        .pipe(tsProject())
+    return gulp.src(tsConfig.include)
+        .pipe(ts(tsConfig.compilerOptions))
         .js.pipe(gulp.dest('build'));
 });
 

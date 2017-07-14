@@ -9,9 +9,10 @@
     "target": "es2015"
   },
   "include": [
-    "ts"
+    "ts/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "ts/test"
   ]
 }
