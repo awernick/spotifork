@@ -3,4 +3,5 @@ gulpfile.js
 README.md
 tsconfig.json
 /build/test
+.travis.yml
 

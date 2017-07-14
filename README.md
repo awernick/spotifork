@@ -1,4 +1,5 @@
 # Spotifork - Spotify Playlist Forker
+[![npm](https://img.shields.io/npm/v/spotifork-node.svg)](https://www.npmjs.com/package/spotifork-node)
 
 ## Install
 ```
