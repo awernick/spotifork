@@ -22,7 +22,7 @@ class CLI {
   }
 
   public _setVersion() {
-    let pinfo = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    let pinfo = require('../package.json');
     this.commander.version(pinfo.version);
   }
 
