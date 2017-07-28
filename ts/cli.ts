@@ -52,88 +52,64 @@ class CLI {
     } 
   }
 
-  public _validateAPI() {
-    return new Promise((resolve, reject) => {
-      this.api.getMe()
-        .then(() => {
-          resolve()
-        })
-        .catch((err: Error) => {
-          reject(err)
-        })
+  public async _validateAPI() {
+    return this.api.getMe();
+  }
+
+  public async _loadAPI() {
+    // Verify that the access token that we have works
+    try {
+      this.api.setAccessToken(this.config.access_token);
+      await this._validateAPI();
+    } 
+
+    // The access token doesn't work, regenerate it.
+    catch(e) {
+      console.log("Missing or invalid access token. Regenerating...");
+
+      try {
+        let token = await this.api.generateAccessToken() 
+        this.config.access_token = token;
+      } catch(e) {
+        console.error("Could not generate/obtain access token. Exiting...");
+        throw e;
+      }
+    }
+
+    // Save config for future use
+    fs.writeFile(CONFIG_PATH, JSON.stringify(this.config), (error?: Error) => {
+      if(error) { console.log("Could not write access token to file") }
     })
   }
 
-  public _loadAPI() {
-    this.api.setAccessToken(this.config.access_token);
-
-    return new Promise((resolve, reject) => {
-      this._validateAPI()
-
-        // Access token is valid
-        .then(() => { 
-          resolve();
-
-          // We are rewriting the access token even if it's valid
-          // TODO: Break chain instead of re-writing.
-          return this.config.access_token;
-        })
-        
-        // Access token is invalid. Regenerate...
-        .catch(() => { 
-          console.log("Missing or invalid access token. Regenerating...");
-          return this.api.generateAccessToken() 
-        })
-        
-        // Save token in config file
-        .then((token: string) => { 
-
-          // Replace old token with new one
-          this.config.access_token = token;
-
-          // Save config for future use
-          fs.writeFile(CONFIG_PATH, JSON.stringify(this.config), (error?: Error) => {
-            if(error) { return reject(error) }
-            resolve();
-          })
-        })
-
-        // Unable to generate a new access token, or unable to save config file
-        .catch((err: Error) => {
-          console.error("Could not generate/obtain access token. Exiting...");
-          reject(err)
-        });
-    })
-  }
-
-  public execute() {
+  public async execute() {
     if(!this.commander.uris) {
       console.error('Please specify uris as arguments');
       return;
     }
 
-    this._loadAPI()
-      .then(() => {
-        let forker = new Forker({
-          visible: this.commander.public,
-          accessToken: this.config.access_token
-        });
+    try {
+      await this._loadAPI();
+    } catch(e) {
+      console.error(e.toString());
+      return;
+    }
 
-        // TODO: Possibly emit events to track of progress (creating, saving,
-        // loading, etc..)
-        console.log("\nForking...");
-        for (let uri of this.commander.uris) {
-          forker.fork(uri)
-            .then(() => {})
-            .catch((err: Error) => { return err })
-            .then((err: Error) => {
-              console.log(`\n+ URI: ${uri}`);
-              if(err) { console.log("  " + err.toString()) }
-              else { console.log("  done!") }
-            });
-        }
-      })
-      .catch((err) => console.error(err.toString()))
+    let forker = new Forker({
+      visible: this.commander.public,
+      accessToken: this.config.access_token
+    });
+
+    console.log("\nForking...");
+    for (let uri of this.commander.uris) {
+      try {
+        console.log(`\n+ URI: ${uri}`);
+        await forker.fork(uri)
+        console.log("  done!")
+      } catch(err) {
+        console.error("  " + err.toString())
+      }
+    }
   }
 }
 
