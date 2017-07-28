@@ -1,4 +1,5 @@
 import Track from "./track";
+import Retry from "./retry";
 let clone = require('lodash.clone');
 
 interface PlaylistOptions {
@@ -155,19 +156,29 @@ class Playlist {
   public async _saveTracks() {
     let tasks = this.tracks
       .map(track => {
+        let fn = this.api.addTracksToPlaylist.bind(
+          this.api, this.userId, this.id, [track.uri]
+        )
         return {
           track:  track, 
-          promise: this.api.addTracksToPlaylist(
-            this.userId, this.id, [track.uri]
-          )
+          promise: fn(),
+          fn: fn
         }
       })
-      .map(async ({ track, promise }) => {
+      .map(async ({ track, promise, fn }) => {
         try {
           await promise
           console.log(`  + ${track.name} by ${track.artists}`);
-        } catch(e) {
-          console.log(`  - ${track.name} by ${track.artists}`);
+        } 
+
+        catch(e) {
+          try {
+            await Retry.do(fn, 3, 500);
+            console.log(`  + ${track.name} by ${track.artists}`);
+          } catch(e) {
+            console.log(`  - ${track.name} by ${track.artists}`);
+            console.error(e.toString());
+          }
         }
       })
 
