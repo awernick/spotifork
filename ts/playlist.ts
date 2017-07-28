@@ -43,24 +43,20 @@ class Playlist {
    * into the appropriate attributes
    * @returns {Promise} status of the request to the Spotify API
    */
-  public load() {
-    return new Promise<any>((resolve: any, reject: any) => {
-      this.api.getPlaylist(this.userId, this.id)
-        .then((data: any) => {
-          this.name = data.body.name;
-          this.collaborative = data.body.collaborative;
-          this.description = data.body.description;
-          this.visible = data.body.public;
-          this._loadTracks(data.body.tracks.items);
-          resolve();
-        })
-        .catch((error: any) => {
-          let err = new Error(
-            "Could not load playlist. Make sure user and id are valid."
-          );
-          reject(err);
-        })
-    })
+  public async load() {
+    try {
+      let data = await this.api.getPlaylist(this.userId, this.id);
+      this.name = data.body.name;
+      this.collaborative = data.body.collaborative;
+      this.description = data.body.description;
+      this.visible = data.body.public;
+      this._loadTracks(data.body.tracks.items);
+    } catch(e) {
+      let err = new Error(
+        "Could not load playlist. Make sure user and id are valid."
+      );
+      throw err;
+    }
   }
 
 
@@ -82,24 +78,9 @@ class Playlist {
    * to generate it.
    * @returns {Promise} status of the request to the Spotify API
    */
-  public save() {
-    return new Promise((resolve, reject) => {
-
-      // Use this so that I don't repeat resolve / reject code
-      let saveTracksFn = () => {
-        this._saveTracks()
-          .then(() => resolve())
-          .catch((err: Error) => reject(err));
-      }
-
-      if(this.id == null) {
-        this.create()
-          .then(() => saveTracksFn())
-          .catch((err: Error) => reject(err))
-      } else {
-        saveTracksFn();
-      }
-    })
+  public async save() {
+    if(this.id == null) { await this.create() }
+    await this._saveTracks();
   }
 
   
@@ -107,22 +88,18 @@ class Playlist {
    * Commits a playlist and its tracks to Spotify.
    * @throws {Error} error - if playlist id is previously set.
    */
-  public create() {
+  public async create() {
     // TODO: Assert id is blank before creating
-
-    return new Promise((resolve, reject) => {
-      this.api.createPlaylist(this.userId, this.name, {
+    try {
+      let data = await this.api.createPlaylist(this.userId, this.name, {
         public: this.visible,
         collaborative: this.collaborative,
         description: this.description
-      }).then((data: any) => {
-        this.id = data.body.id;
-        resolve();
-      }).catch(() => {
-        let err = new Error("Could not create playlist.");
-        reject(err);
       })
-    })
+      this.id = data.body.id;
+    } catch(e) {
+      throw new Error("Could not create playlist.");
+    }
   }
 
 
@@ -131,17 +108,12 @@ class Playlist {
    * NOTE: Unfollowing your own playlist is the same as destroying them 
    * @returns {Promise} status of the request to the Spotify API
    * **/
-  public unfollow() {
-    return new Promise((resolve, reject) => {
-      this.api.unfollowPlaylist(this.userId, this.id)
-        .then((data: any) => {
-          resolve();
-        })
-        .catch(() => {
-          let err = new Error(`Could not unfollow playlist: ${this.id}.`);
-          reject(err);
-        })
-    })
+  public async unfollow() {
+    try {
+      await this.api.unfollowPlaylist(this.userId, this.id)
+    } catch(e) {
+      throw new Error(`Could not unfollow playlist: ${this.id}.`);
+    }
   }
 
 
@@ -180,26 +152,26 @@ class Playlist {
    * Adds the current tracks to the playlist using the Spotify API.
    * @returns {Promise} - status of the Spotify API request
    */
-  public _saveTracks() {
-    function reflect(promise: any){
-      return promise.then(function(v: any){ return {v:v, status: "resolved" }},
-        function(e: any){ return {e:e, status: "rejected" }});
-    }
-
-    return Promise.all(this.tracks.map((track) => {
-      return new Promise((resolve, reject) => {
-        this.api.addTracksToPlaylist(this.userId, this.id, [track.uri])
-          .then((data: any) => {
-            resolve(data);
-          })
-          .catch(() => {
-            let message = `Could not save track ${track.name}`;
-            console.log(message)
-            let err = new Error(message)
-            reject(err);
-          })
+  public async _saveTracks() {
+    let tasks = this.tracks
+      .map(track => {
+        return {
+          track:  track, 
+          promise: this.api.addTracksToPlaylist(
+            this.userId, this.id, [track.uri]
+          )
+        }
       })
-    }).map(reflect))
+      .map(async ({ track, promise }) => {
+        try {
+          await promise
+          console.log(`  + ${track.name} by ${track.artists}`);
+        } catch(e) {
+          console.log(`  - ${track.name} by ${track.artists}`);
+        }
+      })
+
+    return await Promise.all(tasks);
   }
 }
 
