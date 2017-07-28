@@ -41,39 +41,23 @@ class Forker {
    * @param {String} uri - Spotify playlist uri
    * @returns {Promise} success if forking completed, error otherwise
    */
-  public fork(uri: string) {
-    return new Promise((resolve, reject) => {
-      let playlist = PlaylistFactory.fromUri(uri);
-      let user: any;
+  public async fork(uri: string) {
+    let playlist = PlaylistFactory.fromUri(uri);
 
-      // Load User data
-      this.client.getMe()
-      .then((data: any) => { user = data.body })
+    // Load User data
+    let data = await this.client.getMe()
+    let user = data.body;
+    await playlist.load();
 
-      // Load playlist tracks and info
-      .then(() => { return playlist.load() })
+    playlist = playlist.duplicate({
+      id: '',
+      userId: user.id,
+      visible: this.visible
+    });
 
-      // Change playlist user and remove id
-      .then(() => {
-        playlist = playlist.duplicate({
-          id: '',
-          userId: user.id,
-          visible: this.visible
-        });
-        return playlist.create();
-      })
-
-      // Save playlist to the current user's account
-      .then(() => { return playlist.save() })
-
-      // Success!
-      .then(() => resolve(playlist))
-
-      // Throw error if anything happened in the chain
-      .catch((err: Error) => {
-        reject(err);
-      });
-    })
+    await playlist.create();
+    await playlist.save();
+    return playlist;
   }
 }
 
